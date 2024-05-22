@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Menu_Lib
+namespace MenuLib.MenuLib.Menu
 {
-    public class Class1
+    internal class Page
     {
     }
 }
