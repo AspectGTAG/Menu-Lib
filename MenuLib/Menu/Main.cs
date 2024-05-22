@@ -84,10 +84,10 @@ namespace MenuLib.MenuLib.Menu
                     menu.menuroot.transform.rotation = menu.pivot.transform.rotation;
 
                     // Rotate menu around pivot if pivot is right hand
-                    if (!menu.lefthand && menu.pivot == instance.rightControllerTransform.gameObject)
-                    {
-                        menu.menuroot.transform.RotateAround(menu.menuroot.transform.position, menu.menuroot.transform.forward, 180f);
-                    }
+                    //if (!menu.lefthand && menu.pivot == instance.rightControllerTransform.gameObject)
+                    //{
+                    //    menu.menuroot.transform.RotateAround(menu.menuroot.transform.position, menu.menuroot.transform.forward, 180f);
+                    //}
                 }
             }
         }
