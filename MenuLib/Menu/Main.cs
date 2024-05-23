@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
+using MenuLib.MenuLib.Util;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.ProBuilder;
 using UnityEngine.UI;
 
 namespace MenuLib.MenuLib.Menu
@@ -26,6 +28,10 @@ namespace MenuLib.MenuLib.Menu
             {
                 // Send logs
                 Log("Destroying menu");
+
+                // Destroy reference
+                GameObject.Destroy(menu.Reference);
+                menu.Reference = null;
 
                 // Create menuroot rigidbody
                 try
@@ -65,11 +71,31 @@ namespace MenuLib.MenuLib.Menu
 
             else if (stateDepender && menu.menuroot == false)
             {
-                // Send logs
-                Log("Drawing menu");
+                if (menu != null)
+                {
+                    // Send logs
+                    Log("Drawing menu");
 
-                // Draw menu
-                Draw(menu);
+                    // Draw menu
+                    Draw(menu);
+
+                    // Create menu reference
+                    menu.Reference = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    menu.Reference.name = menu.ReferenceName;
+                    menu.Reference.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                    menu.Reference.GetComponent<Renderer>().material.SetColor("_Color", Color.yellow);
+                    menu.Reference.GetComponent<Renderer>().material.shader = textShader;
+
+                    // Get reference parent
+                    if (!GorillaTagger.Instance.offlineVRRig.enabled)
+                    {
+                        menu.ReferenceParent = menu.lefthand ? instance.rightControllerTransform.gameObject : instance.leftControllerTransform.gameObject;
+                    }
+                    else
+                    {
+                        menu.ReferenceParent = menu.lefthand ? GorillaTagger.Instance.rightHandTriggerCollider : GorillaTagger.Instance.leftHandTriggerCollider;
+                    }
+                }
             }
 
             if (stateDepender)
@@ -79,6 +105,13 @@ namespace MenuLib.MenuLib.Menu
 
                 if (menu.pivot)
                 {
+                    Vector3 offset = Vector3.zero;
+                    if (menu.ReferenceParent == instance.rightControllerTransform.gameObject || menu.ReferenceParent == instance.leftControllerTransform.gameObject)
+                        offset = new Vector3(0, -0.1f, 0);
+
+                    // Update reference
+                    menu.Reference.transform.position = menu.ReferenceParent.transform.position + offset;
+
                     // Update menuroot transform
                     menu.menuroot.transform.position = menu.pivot.transform.position;
                     menu.menuroot.transform.rotation = menu.pivot.transform.rotation;
@@ -94,8 +127,6 @@ namespace MenuLib.MenuLib.Menu
 
         private static void Draw(Menu menu) // Draws the menu
         {
-            if (menu == null) return; // Return if menu is empty
-
             // Create menuroot
             Log("Creating MenuRoot");
             menu.menuroot = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -110,7 +141,7 @@ namespace MenuLib.MenuLib.Menu
             GameObject.Destroy(background.GetComponent<Rigidbody>());
             GameObject.Destroy(background.GetComponent<Collider>());
             background.transform.SetParent(menu.menuroot.transform, false);
-            background.transform.localScale = new Vector3(0.1f, 1f, 1f);
+            background.transform.localScale = menu.Scale * GorillaLocomotion.Player.Instance.scale;
             background.transform.position = new Vector3(0.05f, 0f, 0f) * GorillaLocomotion.Player.Instance.scale;
             background.GetComponent<Renderer>().material.SetColor("_Color", menu.color);
 
@@ -133,14 +164,107 @@ namespace MenuLib.MenuLib.Menu
             text.text = menu.title + " [" + menu.currentPage.ToString() + "]";
             text.color = Color.white;
             text.fontSize = 1;
-            text.fontStyle = FontStyle.BoldAndItalic;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.fontStyle = FontStyle.Normal;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 0;
+
+            // Implemented text rotation
+            text.GetComponent<RectTransform>().sizeDelta = new Vector2(0.28f, 0.05f);
+            text.GetComponent<RectTransform>().position = new Vector3(0.06f, 0f, 0.175f);
+            text.GetComponent<RectTransform>().rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+
+            AddPageButtons(menu);
+            
+            Category currentCategory = menu.categories[menu.currentCategory];
+            Button[] array = currentCategory.buttons.Skip(menu.currentPage * menu.ButtonsPerPage).Take(menu.ButtonsPerPage).ToArray();
+            for (int i = 0; i < array.Length; i++)
+            {
+                AddButton(menu.ButtonSpace * i, array[i], menu);
+            }
+            
+        }
+
+        private static void AddButton(float Offset, Button button, Menu menu)
+        {
+            // creates the button object
+            GameObject buttonGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            UnityEngine.Object.Destroy(buttonGO.GetComponent<Rigidbody>());
+            buttonGO.GetComponent<BoxCollider>().isTrigger = true;
+            buttonGO.transform.SetParent(menu.menuroot.transform, false);
+            buttonGO.transform.localScale = new Vector3(0.09f, menu.Scale.y - menu.SpaceToSide * 2, 0.08f);
+            buttonGO.transform.localPosition = new Vector3(0.56f, 0f, 0.28f - Offset);
+            buttonGO.AddComponent<ButtonCollider>().button = button;
+            buttonGO.GetComponent<ButtonCollider>().menu = menu;
+
+            // manages the button colors
+            Color targetColor = button.ButtonType == "label" ? menu.label : button.Enabled ? menu.on : menu.off;
+            buttonGO.GetComponent<Renderer>().material.SetColor("_Color", targetColor);
+
+            // creates the text objects
+            GameObject textObj = new GameObject();
+            textObj.transform.parent = menu.Canvas.transform;
+            Text text = textObj.AddComponent<Text>();
+            text.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+            text.text = button.Title + button.Text;
+            text.fontSize = 1;
             text.alignment = TextAnchor.MiddleCenter;
             text.resizeTextForBestFit = true;
             text.resizeTextMinSize = 0;
+
+            // initialize the text rect transform
+            text.GetComponent<RectTransform>().sizeDelta = new Vector2(0.2f, 0.03f);
+            text.GetComponent<RectTransform>().localPosition = new Vector3(0.064f, 0f, 0.111f - Offset / 2.55f);
+            text.GetComponent<RectTransform>().rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
-        // Get gorilla tag shader
+        private static void AddPageButtons(Menu menu)
+        {
+            // button variables
+            float space = -menu.ButtonSpace;
+            float calculatedSpace = menu.ButtonSpace * menu.ButtonsPerPage;
+            string ButtonText = "<<<";
+
+            for (int i = 0; i < 2; i++)
+            {
+                space += menu.ButtonSpace;
+
+                // creates the button object
+                GameObject button = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                GameObject.Destroy(button.GetComponent<Rigidbody>());
+                button.GetComponent<BoxCollider>().isTrigger = true;
+                button.transform.SetParent(menu.menuroot.transform, false);
+                button.transform.localScale = new Vector3(0.09f, menu.Scale.y - menu.SpaceToSide * 2, 0.08f);
+                button.transform.localPosition = new Vector3(0.56f, 0f, 0.28f - calculatedSpace);
+                button.GetComponent<Renderer>().material.SetColor("_Color", menu.off);
+                button.AddComponent<ButtonCollider>().button = Button.CreateButton(menu, ButtonText, "no_toggle", null, dontattachtocategory:true);
+                button.GetComponent<ButtonCollider>().menu = menu;
+
+                // creates the text objects
+                GameObject textObj = new GameObject();
+                textObj.transform.parent = menu.Canvas.transform;
+                Text text = textObj.AddComponent<Text>();
+                text.font = menu.font;
+                text.text = ButtonText;
+                text.fontSize = 1;
+                text.alignment = TextAnchor.MiddleCenter;
+                text.fontStyle = FontStyle.Normal;
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 0;
+
+                // initialize the text rect transform
+                text.GetComponent<RectTransform>().sizeDelta = new Vector2(0.2f, 0.03f) * GorillaLocomotion.Player.Instance.scale;
+                text.GetComponent<RectTransform>().localPosition = new Vector3(0.064f, 0f, 0.111f - calculatedSpace / 2.522522522522523f) * GorillaLocomotion.Player.Instance.scale;
+                text.GetComponent<RectTransform>().rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
+
+                ButtonText = ">>>";
+                calculatedSpace = menu.ButtonSpace * (menu.ButtonsPerPage + 1);
+            }
+        }
+
+        // Get gorilla tag shaders
         public static Shader uberShader = Shader.Find("GorillaTag/UberShader");
+        public static Shader textShader = Shader.Find("GUI/Text Shader");
 
         // Change shader to gorilla tag shader to fix rendering problems
         [HarmonyPatch(typeof(Material), "SetColor", new[] { typeof(string), typeof(Color) })]
@@ -160,12 +284,19 @@ namespace MenuLib.MenuLib.Menu
 
     public class Menu
     {
-        // Menu settings
+        // Menu
+        public GameObject menuroot;
         public bool lefthand = true;
         public GameObject pivot;
+        public int ButtonsPerPage = 4;
+        public float ButtonSpace = 0.13f;
+        public float SpaceToSide = 0.05f;
+        public Vector3 Scale;
 
-        // GameObjects
-        public GameObject menuroot;
+        // Reference
+        public GameObject Reference = null;
+        public string ReferenceName;
+        public GameObject ReferenceParent;
 
         // Text
         public string title;
@@ -176,45 +307,56 @@ namespace MenuLib.MenuLib.Menu
         public bool colorslider;
         public Color color;
         public Color[] colors;
-        public Color off;
-        public Color on;
+        public Color label = Color.grey;
+        public Color off = Color.red;
+        public Color on = Color.green;
 
-        public static Menu CreateMenu(string title, Color[] colors, GameObject customPivot = null)
+        public static Menu CreateMenu(string title, Color[] colors, Vector3 scale, bool leftHand = true)
         {
             Menu menu = new Menu();
 
             menu.title = title;
             menu.colorslider = true;
             menu.colors = colors;
+            menu.Scale = scale;
 
-            if (!customPivot)
+            menu.lefthand = leftHand;
+            if (leftHand)
             {
                 menu.pivot = GorillaLocomotion.Player.Instance.leftControllerTransform.gameObject;
             }
             else
             {
-                menu.pivot = customPivot;
+                menu.pivot = GorillaLocomotion.Player.Instance.rightControllerTransform.gameObject;
             }
+
+            menu.ReferenceName = Utillities.GenString(100);
+            Category.CreateCategory(menu, "main");
 
             return menu;
         }
 
-        public static Menu CreateMenu(string title, Color color, GameObject customPivot = null)
+        public static Menu CreateMenu(string title, Color color, Vector3 scale, bool leftHand = true)
         {
             Menu menu = new Menu();
 
             menu.title = title;
             menu.colorslider = false;
             menu.color = color;
+            menu.Scale = scale;
 
-            if (!customPivot)
+            menu.lefthand = leftHand;
+            if (leftHand)
             {
                 menu.pivot = GorillaLocomotion.Player.Instance.leftControllerTransform.gameObject;
             }
             else
             {
-                menu.pivot = customPivot;
+                menu.pivot = GorillaLocomotion.Player.Instance.rightControllerTransform.gameObject;
             }
+
+            menu.ReferenceName = Utillities.GenString(100);
+            Category.CreateCategory(menu, "main");
 
             return menu;
         }
@@ -245,7 +387,22 @@ namespace MenuLib.MenuLib.Menu
             }
         }
 
+        public void RefreshMenu()
+        {
+            UnityEngine.Object.Destroy(this.menuroot);
+            this.menuroot = null;
+            UnityEngine.Object.Destroy(this.Reference);
+            this.Reference = null;
+        }
+
         // Page system
         public int currentPage = 0;
+
+        // Category system
+        public Dictionary<string, Category> categories = new Dictionary<string, Category>();
+        public string currentCategory = "main";
+
+        // Button system
+        public Button[] EnabledButtons = new Button[] { };
     }
 }

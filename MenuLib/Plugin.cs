@@ -11,7 +11,7 @@ namespace MenuLib.MenuLib.Plugin
     {
         // Version settings
         private const string modGUID = "aspect.cheat.panel";
-        public const string modVersion = "6.2.6";
+        public const string modVersion = "7.0.0";
         private const string modName = "Aspect Cheat Panel";
         public const string menuName = modVersion;
 
@@ -33,9 +33,12 @@ namespace MenuLib.MenuLib.Plugin
                 // Create menu
                 menu = Menu.Menu.CreateMenu(
                     menuName,
-                    Color.black
+                    Color.black,
+                    new Vector3(0.1f, 1f, 1f)
                 );
                 runSetup = false;
+
+                Button.CreateButton(menu, "test", "toggle", new System.Action[] { });
             }
 
             // Update menu

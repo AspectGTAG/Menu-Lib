@@ -36,7 +36,6 @@
     <Compile Include="MenuLib\Menu\Button.cs" />
     <Compile Include="MenuLib\Menu\Category.cs" />
     <Compile Include="MenuLib\Menu\Main.cs" />
-    <Compile Include="MenuLib\Menu\Page.cs" />
     <Compile Include="MenuLib\Plugin.cs" />
     <Compile Include="MenuLib\Util\Input.cs" />
     <Compile Include="MenuLib\Util\Utillities.cs" />
