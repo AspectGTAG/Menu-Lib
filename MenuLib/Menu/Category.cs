@@ -11,6 +11,8 @@ namespace MenuLib.MenuLib.Menu
         public List<Category> categories { get; private set; } = new List<Category>(); // Categories inside this category
         public List<Button> buttons { get; private set; } = new List<Button>(); // Buttons inside this category
 
+        public int currentPage = 0;
+
         public static Category CreateCategory(Menu menu, string path, string description = "")
         {
             // Cancel creation of category if path is taken
@@ -31,6 +33,23 @@ namespace MenuLib.MenuLib.Menu
 
             // Add category to menu
             menu.categories.Add(path, category);
+
+            if (path != Menu.mainPath)
+            {
+                // Get parent path
+                string parent_path = path.Replace($":{name}", "");
+
+                // Add category to parent category
+                menu.categories[parent_path].categories.Add(category);
+
+                // Create category button
+                Button cat_button = Button.CreateButton(menu, name, "no_toggle", new System.Action[] { () => { menu.currentCategory = path; } }, parent_path);
+
+                // Add return button to current category - attaching it manually because it doesn't attach automaticly for some reason
+                string parent_cat = splitPath[splitPath.Length - 2];
+                Button return_btn = Button.CreateButton(menu, $"Return To {parent_cat}", "no_toggle", new System.Action[] { () => { menu.currentCategory = parent_path; } }, dontattachtocategory: true);
+                category.buttons.Add(return_btn);
+            }
             
             // return new category
             return category;

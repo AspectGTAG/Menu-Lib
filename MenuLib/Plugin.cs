@@ -24,13 +24,16 @@ namespace MenuLib.MenuLib.Plugin
         bool runSetup = true;
         Menu.Menu menu;
 
-        // Update loop
+        /// <summary>
+        /// This is the update loop used for updating the menu.
+        /// 
+        /// </summary>
         public void LateUpdate()
         {
             // Setup menu
             if (runSetup)
             {
-                // Create menu
+                // Example of creating a new menu instance
                 menu = Menu.Menu.CreateMenu(
                     menuName,
                     Color.black,
@@ -38,7 +41,20 @@ namespace MenuLib.MenuLib.Plugin
                 );
                 runSetup = false;
 
-                Button.CreateButton(menu, "test", "toggle", new System.Action[] { });
+                // making buttons in "main" category
+                Button.CreateButton(menu, "label", "label", new System.Action[] { });
+                Button.CreateButton(menu, "toggle", "toggle", new System.Action[] { () => Debug.Log("update") });
+                Button.CreateButton(menu, "no_toggle", "no_toggle", new System.Action[] { () => Debug.Log("update") });
+
+                // making buttons in a new category
+                Button.CreateButton(menu, "test_cat", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "new_category");
+                Button.CreateButton(menu, "test_btn", "toggle", new System.Action[] { }, category: "new_category");
+
+                // creating a category inside a category
+                // currently buggy, fixing soon
+
+                // creating a second category
+                Button.CreateButton(menu, "test_cat2", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "new_category2");
             }
 
             // Update menu
