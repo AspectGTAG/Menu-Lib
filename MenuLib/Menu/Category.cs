@@ -43,11 +43,12 @@ namespace MenuLib.MenuLib.Menu
                 menu.categories[parent_path].categories.Add(category);
 
                 // Create category button
-                Button cat_button = Button.CreateButton(menu, name, "no_toggle", new System.Action[] { () => { menu.currentCategory = path; } }, parent_path);
+                Button cat_button = Button.CreateButton(menu, name, "no_toggle", new System.Action[] { () => { menu.currentCategory = path; } }, dontattachtocategory: true);
+                menu.categories[parent_path].buttons.Add(cat_button);
 
                 // Add return button to current category - attaching it manually because it doesn't attach automaticly for some reason
-                string parent_cat = splitPath[splitPath.Length - 2];
-                Button return_btn = Button.CreateButton(menu, $"Return To {parent_cat}", "no_toggle", new System.Action[] { () => { menu.currentCategory = parent_path; } }, dontattachtocategory: true);
+                string parent_cat_n = splitPath[splitPath.Length - 2];
+                Button return_btn = Button.CreateButton(menu, $"Return To {parent_cat_n}", "no_toggle", new System.Action[] { () => { menu.currentCategory = parent_path; } }, dontattachtocategory: true);
                 category.buttons.Add(return_btn);
             }
             

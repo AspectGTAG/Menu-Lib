@@ -6,7 +6,18 @@ using System.Threading.Tasks;
 
 namespace MenuLib.MenuLib.Config
 {
-    internal class ConfigSystem
+    public static class ConfigSystem
     {
+        public static string test_title = "test";
+
+        public static void LoadConfig()
+        {
+
+        }
+
+        public static void SaveConfig()
+        {
+
+        }
     }
 }

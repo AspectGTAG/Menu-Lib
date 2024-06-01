@@ -26,7 +26,7 @@ namespace MenuLib.MenuLib.Plugin
 
         /// <summary>
         /// This is the update loop used for updating the menu.
-        /// 
+        /// This contains 
         /// </summary>
         public void LateUpdate()
         {
@@ -41,20 +41,25 @@ namespace MenuLib.MenuLib.Plugin
                 );
                 runSetup = false;
 
-                // making buttons in "main" category
+                // create a button in main category
                 Button.CreateButton(menu, "label", "label", new System.Action[] { });
                 Button.CreateButton(menu, "toggle", "toggle", new System.Action[] { () => Debug.Log("update") });
                 Button.CreateButton(menu, "no_toggle", "no_toggle", new System.Action[] { () => Debug.Log("update") });
 
-                // making buttons in a new category
-                Button.CreateButton(menu, "test_cat", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "new_category");
-                Button.CreateButton(menu, "test_btn", "toggle", new System.Action[] { }, category: "new_category");
+                // create a button in a new category
+                Button.CreateButton(menu, "label", "label", new System.Action[] { }, category: "category_1");
+                Button.CreateButton(menu, "toggle", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "category_1");
+                Button.CreateButton(menu, "no_toggle", "no_toggle", new System.Action[] { () => Debug.Log("update") }, category: "category_1");
 
                 // creating a category inside a category
-                // currently buggy, fixing soon
+                Button.CreateButton(menu, "label", "label", new System.Action[] { }, category: "category_1:category_2");
+                Button.CreateButton(menu, "toggle", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "category_1:category_2");
+                Button.CreateButton(menu, "no_toggle", "no_toggle", new System.Action[] { () => Debug.Log("update") }, category: "category_1:category_2");
 
                 // creating a second category
-                Button.CreateButton(menu, "test_cat2", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "new_category2");
+                Button.CreateButton(menu, "label", "label", new System.Action[] { }, category: "category_2");
+                Button.CreateButton(menu, "toggle", "toggle", new System.Action[] { () => Debug.Log("update") }, category: "category_1");
+                Button.CreateButton(menu, "no_toggle", "no_toggle", new System.Action[] { () => Debug.Log("update") }, category: "category_1");
             }
 
             // Update menu

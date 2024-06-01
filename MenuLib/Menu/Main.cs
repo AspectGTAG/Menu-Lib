@@ -27,7 +27,7 @@ namespace MenuLib.MenuLib.Menu
                 if (button != null && button.Enabled)
                 {
                     try
-                    {
+                    { 
                         if (button.Actions.Length > 1)
                         {
                             button.Actions[1].Invoke();
@@ -66,10 +66,9 @@ namespace MenuLib.MenuLib.Menu
 
                 foreach (SphereCollider c_collider in menu.ReferenceParent.GetComponentsInChildren<SphereCollider>())
                 {
-                    if (c_collider.gameObject.name == menu.ReferenceName)
+                    if (c_collider.gameObject.name == menu.ReferenceName) // check if gameobject name is equal to reference name
                     {
                         GameObject.Destroy(c_collider);
-                        GameObject.Destroy(c_collider.gameObject);
                         menu.Reference = null;
                     }
                 }
@@ -113,7 +112,7 @@ namespace MenuLib.MenuLib.Menu
                 }
                 else
                 {
-                    // Destroy Menu
+                    // Destroy menu instantly
                     GameObject.Destroy(menu.menuroot);
                     menu.menuroot = null;
                 }
@@ -270,8 +269,8 @@ namespace MenuLib.MenuLib.Menu
             text.resizeTextMinSize = 0;
 
             // initialize the text rect transform
-            text.GetComponent<RectTransform>().sizeDelta = new Vector2(0.2f, 0.03f);
-            text.GetComponent<RectTransform>().localPosition = new Vector3(0.064f, 0f, 0.111f - Offset / 2.523f);
+            text.GetComponent<RectTransform>().sizeDelta = new Vector2(0.2f, 0.03f) * GorillaLocomotion.Player.Instance.scale;
+            text.GetComponent<RectTransform>().localPosition = new Vector3(0.064f, 0f, 0.111f - Offset / Menu.TextDivider) * GorillaLocomotion.Player.Instance.scale;
             text.GetComponent<RectTransform>().rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
         }
 
@@ -318,7 +317,7 @@ namespace MenuLib.MenuLib.Menu
 
                 // initialize the text rect transform
                 text.GetComponent<RectTransform>().sizeDelta = new Vector2(0.2f, 0.03f) * GorillaLocomotion.Player.Instance.scale;
-                text.GetComponent<RectTransform>().localPosition = new Vector3(0.064f, 0f, 0.111f - Menu.ButtonSpace * (Menu.ButtonsPerPage + 1 * i) / 2.523f) * GorillaLocomotion.Player.Instance.scale;
+                text.GetComponent<RectTransform>().localPosition = new Vector3(0.064f, 0f, 0.111f - Menu.ButtonSpace * (Menu.ButtonsPerPage + 1 * i) / Menu.TextDivider) * GorillaLocomotion.Player.Instance.scale;
                 text.GetComponent<RectTransform>().rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
             }
         }
@@ -352,13 +351,13 @@ namespace MenuLib.MenuLib.Menu
         public Vector3 Scale;
 
         // Constant menu settings
-        public const int ButtonsPerPage = 4;
-        public const float ButtonSpace = 0.13f;
-        public const float SpaceToSides = 0.1f;
-        public const float DefaultButtonOffset = 0.28f;
-        public const float TextDivider = 2.55f; // a more acurate version is 2.523f
-        public const bool FallPhysics = false;
-        public const float DestroyDelay = 2;
+        public static int ButtonsPerPage { get; internal set; } = 4;
+        public static float ButtonSpace { get; internal set; } = 0.13f;
+        public static float SpaceToSides { get; internal set; } = 0.1f;
+        public static float DefaultButtonOffset { get; internal set; } = 0.28f;
+        public static float TextDivider { get; internal set; } = 2.55f; // a more acurate version is 2.523f
+        public static bool FallPhysics { get; internal set; } = false;
+        public static float DestroyDelay { get; internal set; } = 2;
 
         // Reference
         public GameObject Reference = null;

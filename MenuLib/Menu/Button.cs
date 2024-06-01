@@ -47,7 +47,7 @@ namespace MenuLib.MenuLib.Menu
 
         public void ChangeButtonCategory(string category)
         {
-            // make code that changes the current category of a button
+            // TODO: make code that changes the current category of a button
         }
     }
 
@@ -66,7 +66,7 @@ namespace MenuLib.MenuLib.Menu
 
                 // Page buttons
                 Category category = menu.categories[menu.currentCategory];
-                float pagecount_f = category.buttons.Count / Menu.ButtonsPerPage;
+                float pagecount_f = (category.buttons.Count - 1) / Menu.ButtonsPerPage;
                 if (button.ButtonType == "page_button_left")
                 {
                     if (category.currentPage > 0)
@@ -147,7 +147,7 @@ namespace MenuLib.MenuLib.Menu
                     }
                     catch (Exception e)
                     {
-                        Debug.Log(e.Message);
+                        Main.Log(e.Message);
                     }
                 }
                 
