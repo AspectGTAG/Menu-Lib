@@ -215,8 +215,10 @@ namespace MenuLib.MenuLib.Menu
             textObj.transform.parent = menu.Canvas.transform;
             Text text = textObj.AddComponent<Text>();
             text.font = menu.font;
-            int currentPage = menu.categories[menu.currentCategory].currentPage;
-            text.text = menu.title + " [" + currentPage.ToString() + "]";
+            Category currentCategory = menu.categories[menu.currentCategory];
+            float pagecount_f = (currentCategory.buttons.Count - 1) / Menu.ButtonsPerPage;
+            int currentPage = currentCategory.currentPage;
+            text.text = menu.title + $" [{currentPage+1}:{(int)Math.Ceiling(pagecount_f)+1}]";
             text.color = Color.white;
             text.fontSize = 1;
             text.alignment = TextAnchor.MiddleCenter;
@@ -233,7 +235,6 @@ namespace MenuLib.MenuLib.Menu
             AddPageButtons(menu);
             
             // Add buttons to page
-            Category currentCategory = menu.categories[menu.currentCategory];
             Button[] array = currentCategory.buttons.Skip(currentPage * Menu.ButtonsPerPage).Take(Menu.ButtonsPerPage).ToArray();
             for (int i = 0; i < array.Length; i++)
             {
